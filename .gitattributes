@@ -1,0 +1,4 @@
+*.sln eol=crlf
+*.cpp eol=crlf
+*.h eol=crlf
+*.vcxproj* eol=crlf
