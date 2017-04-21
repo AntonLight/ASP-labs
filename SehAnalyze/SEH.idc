@@ -55,8 +55,8 @@ static print_unwind_info(unwind_data) {
           count, frame);
 
   if (flags && count) {
-    auto offset = count * 3; // sizeof UNWIND_CODE
-    if (offset & 3) offset = (offset & ~3) + 4; 
+    auto offset = 4 + count * 2; // sizeof UNWIND_CODE
+    if (count & 1) offset += 2; 
     auto fn_handler = Dword(unwind_data + offset);
     auto name = GetFunctionName(textbss_base + fn_handler);
     Message("Function handler: %s @ %08x\n", name, fn_handler);
