@@ -53,6 +53,14 @@ static print_unwind_info(unwind_data) {
           "Frame info: %b\n\n", // frame registers & offsets
           version, prolog,
           count, frame);
+
+  if (flags && count) {
+    auto offset = count * 3; // sizeof UNWIND_CODE
+    if (offset & 3) offset = (offset & ~3) + 4; 
+    auto fn_handler = Dword(unwind_data + offset);
+    auto name = GetFunctionName(textbss_base + fn_handler);
+    Message("Function handler: %s @ %08x\n", name, fn_handler);
+  }
 }
 
 static main() {
