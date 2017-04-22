@@ -35,9 +35,54 @@ static print_flag(flag) {
   }
 }
 
-static print_unwind_info(unwind_data) {
+static is_address(num) {
+  return num != -1 && num != 0 && num != 1;
+}
 
-  unwind_data = unwind_data + textbss_base;
+static print_except_filter(filter) {
+  auto f = filter;
+  filter = textbss_base + filter;
+  if (f == 4294967295) Message("\tFilter:        EXCEPTION_CONTINUE_EXECUTION\n");
+  else if (f == 0) Message("\tFilter:        EXCEPTION_CONTINUE_SEARCH\n");
+  else if (f == 1) Message("\tFilter:        EXCEPTION_EXECUTE_HANDLER\n");
+  else Message("\tFilter:        0x%016x aka %s\n", filter, GetFunctionName(filter));
+}
+
+static print_handlers(addr) {
+  auto num = Dword(addr);
+  if (num == 0 && num > 3) return;
+  addr = addr + 4;
+
+  Message("\nFounded %x block handlers @ %x:\n", num, addr);
+  auto i = 0;
+  for (; i < num; i++, addr = addr + 16) {
+    auto begin   = textbss_base + Dword(addr);
+    auto end     = textbss_base + Dword(addr + 4);
+    auto filter  = Dword(addr + 8);
+    auto handler = Dword(addr + 12);
+    Message("\tTry begin:     0x%016x aka %s\n"
+            "\tTry end:       0x%016x aka %s\n",
+            begin, GetFunctionName(begin),
+            end, GetFunctionName(end));
+
+    if (is_address(handler)) {
+      handler = textbss_base + handler;
+      print_except_filter(filter);
+      Message("\tExcept block:  0x%016x aka %s\n",
+              handler, GetFunctionName(handler));
+    } else if (is_address(filter) && !is_address(handler)) {
+      filter = textbss_base + filter;
+      Message("\tFinally block: 0x%016x aka %s\n", filter, GetFunctionName(filter));
+    } else {
+      filter = textbss_base + filter;
+      handler = textbss_base + handler;
+      Message("\tCan't determine handler types: 0x%016x & 0x%016x", filter, handler);
+    }
+  }
+}
+
+static print_unwind_info(unwind_data) {
+  unwind_data = unwind_data;
 
   auto info = Byte(unwind_data);
   auto version = info & 0b111;
@@ -55,11 +100,12 @@ static print_unwind_info(unwind_data) {
           count, frame);
 
   if (flags && count) {
-    auto offset = 4 + count * 2; // sizeof UNWIND_CODE
-    if (count & 1) offset += 2; 
-    auto fn_handler = Dword(unwind_data + offset);
-    auto name = GetFunctionName(textbss_base + fn_handler);
-    Message("Function handler: %s @ %08x\n", name, fn_handler);
+    auto offset = 4 + count * 2;
+    if (count & 1) offset = offset + 2; 
+    auto fn_handler = textbss_base + Dword(unwind_data + offset);
+    auto name = GetFunctionName(fn_handler);
+    Message("Function handler: %s @ 0x%016x\n", name, fn_handler);
+    print_handlers(unwind_data + offset + 4);
   }
 }
 
@@ -70,10 +116,13 @@ static main() {
   auto addr = pdata;
   while (addr < SegEnd(pdata)) {
     do { // for quick goto-next
-      auto func_start = Dword(addr);
-      auto func_end = Dword(addr + 4);
-      auto unwind_data = Dword(addr + 8);
+      auto func_start  = textbss_base + Dword(addr);
+      auto func_end    = textbss_base + Dword(addr + 4);
+      auto name        = GetFunctionName(func_start);
+      auto unwind_data = textbss_base + Dword(addr + 8);
       if (func_end - func_start == 0) break;
+      if (Byte(unwind_data) >> 3 == 0) break;
+      if (name != "CFunc") break; // debug only
       if (func_start != 0 && func_end != 0) {
         Message("~~\tAddr: 0x%016x\n"
                 "~~\tName: %s\n"
@@ -81,7 +130,7 @@ static main() {
                 "~~\tFunc end    @ 0x%016x\n"
                 "~~\tUnwind info @ 0x%016x \n",
                 addr,
-                GetFunctionName(textbss_base + func_start),
+                name,
                 func_start,
                 func_end,
                 unwind_data);
