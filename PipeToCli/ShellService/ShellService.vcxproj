@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{154C9A80-9D07-4FC7-A9E8-584D61B61106}</ProjectGuid>
+    <ProjectGuid>{12B5ED10-B59C-4182-8950-72A447D9CE45}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>PipeToCli</RootNamespace>
+    <RootNamespace>ShellService</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -143,14 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="lib.h" />
-    <ClInclude Include="Server.hpp" />
-    <ClInclude Include="Shell.hpp" />
+    <ClInclude Include="ShellService.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ShellServer.cpp" />
+    <ClCompile Include="ServiceCtrl.cpp" />
+    <ClCompile Include="ShellService.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{154C9A80-9D07-4FC7-A9E8-584D61B61106}</ProjectGuid>
+    <ProjectGuid>{0BED6476-AAE1-4F60-8F3F-AF41CD7635CC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>PipeToCli</RootNamespace>
+    <RootNamespace>SockClient</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -143,14 +143,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="lib.h" />
-    <ClInclude Include="Server.hpp" />
-    <ClInclude Include="Shell.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ShellServer.cpp" />
+    <ClCompile Include="SockClient.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

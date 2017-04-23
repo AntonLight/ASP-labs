@@ -1,6 +1,8 @@
 #pragma once
 
-#include <stdio.h>
+#include <windows.h>
+#include "lib.h"
+#include <locale>
 
 class Shell {
 public:
@@ -10,12 +12,14 @@ public:
 		sa.bInheritHandle = TRUE;
 		sa.lpSecurityDescriptor = NULL;
 
-		if (!CreatePipe(&out_r, &out_w, &sa, 0) || 
+		if (!CreatePipe(&out_r, &out_w, &sa, 0) ||
 			!CreatePipe(&in_r, &in_w, &sa, 0)) die(L"Can't initialize I/O pipes");
 
-		COMMTIMEOUTS timeout = {0,0,1000,0,1000};
-		SetCommTimeouts(in_w, &timeout);
-		SetCommTimeouts(out_r, &timeout);
+		SetHandleInformation(out_r, HANDLE_FLAG_INHERIT, 0);
+		SetHandleInformation(in_w, HANDLE_FLAG_INHERIT, 0);
+
+		if (!SetConsoleOutputCP(65001))
+			die(L"SetConsoleOutputCP failed");
 
 		PROCESS_INFORMATION pi = { 0 };
 		STARTUPINFO si = { 0 };
@@ -27,30 +31,28 @@ public:
 
 		LPTSTR cmd = _tcsdup(L"cmd"); // http://stackoverflow.com/questions/10044230/unhandled-error-with-createprocess
 									  // f4k u m$
-		if (!CreateProcess(NULL, cmd, NULL, 
-			NULL, TRUE, NULL,
+		if (!CreateProcess(NULL, cmd, NULL,
+			NULL, TRUE, CREATE_NO_WINDOW,
 			NULL, NULL, &si, &pi)) die(L"Can't start command terminal");
 
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 		CloseHandle(out_w); // no need to write for child stdout
 		CloseHandle(in_r);  // no need to read child stdin
-		char buf[512]; unsigned long a;
-		ReadFile(out_r, buf, sizeof(buf), &a, NULL); // Read unnecessary
 	}
+
 	~Shell() {
 		CloseHandle(out_r);
 		CloseHandle(in_w);
 	}
 
-	unsigned long read(char *buf, size_t len) {
-		unsigned long read;
+	ULONG read(char *buf, size_t len) {
+		ULONG read;
 		if (!ReadFile(out_r, buf, len, &read, NULL)) die(L"Can't read the result from shell");
 		return read;
 	}
-
-	unsigned long exec(char *buf, size_t len) {
-		unsigned long written;
+	ULONG write(char *buf, size_t len) {
+		ULONG written;
 		if (!WriteFile(in_w, buf, len, &written, NULL)) die(L"Can't exec command at shell");
 		return written;
 	}
