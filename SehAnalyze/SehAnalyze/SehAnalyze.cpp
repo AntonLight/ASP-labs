@@ -41,7 +41,31 @@ void CFunc() {
 	__try {
 		CFunc1();
 	} __except (CFuncFilter(GetExceptionInformation())) {
-		printf("in handler\n");
+		printf("in handler1\n");
+	}
+	__try {
+		CFunc1();
+	}
+	__except (EXCEPTION_CONTINUE_EXECUTION) {
+		printf("in handler2\n");
+	}
+	__try {
+		CFunc1();
+	}
+	__except (EXCEPTION_CONTINUE_SEARCH) {
+		printf("in handler3\n");
+	}
+	__try {
+		CFunc1();
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		printf("in handler4\n");
+		__try {
+			CFunc1();
+		}
+		__except (2) {
+			printf("in handler5\n");
+		}
 	}
 }
 
