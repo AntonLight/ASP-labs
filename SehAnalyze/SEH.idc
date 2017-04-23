@@ -50,7 +50,7 @@ static print_except_filter(filter) {
 
 static print_handlers(addr) {
   auto num = Dword(addr);
-  if (num == 0 && num > 3) return;
+  if (num == 0 || num > 3) return;
   addr = addr + 4;
 
   Message("\nFounded %x block handlers @ %x:\n", num, addr);
@@ -121,8 +121,7 @@ static main() {
       auto name        = GetFunctionName(func_start);
       auto unwind_data = textbss_base + Dword(addr + 8);
       if (func_end - func_start == 0) break;
-      if (Byte(unwind_data) >> 3 == 0) break;
-      if (name != "CFunc") break; // debug only
+      if ((Byte(unwind_data) >> 3 & (UNW_FLAG_EHANDLER | UNW_FLAG_UHANDLER)) == 0) break;
       if (func_start != 0 && func_end != 0) {
         Message("~~\tAddr: 0x%016x\n"
                 "~~\tName: %s\n"
