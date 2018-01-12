@@ -54,13 +54,14 @@ int main() {
 	//Shell shell;
 	Server s;
 	s.set_up();
-	s.handle([/*&shell*/](SOCKET s) {
-		char buf[buff_size];
-		auto len = recv(s, buf, buff_size, 0);
-		trim(buf, len);
-		auto res = exec(buf);
-		send(s, res.c_str(), res.size(), 0);
-	});
-    return 0;
+	s.run();
+	// s.handle([/*&shell*/](SOCKET s) {
+	// 	char buf[buff_size];
+	// 	auto len = recv(s, buf, buff_size, 0);
+	// 	trim(buf, len);
+	// 	auto res = exec(buf);
+	// 	send(s, res.c_str(), res.size(), 0);
+	// });
+	return 0;
 }
 

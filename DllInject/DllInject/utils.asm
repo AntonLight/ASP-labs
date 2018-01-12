@@ -7,6 +7,7 @@ PUBLIC find_getproc
 
 kernel32_base PROC
 	mov edx, fs:[30h]
+	; For some reason MASM sucked in assembling
 	db 8bh, 52h, 0ch	;mov edx, [edx+0Ch] ; -> loader
 	db 8bh, 52h, 14h	;mov edx, [edx+14h] ; -> in-mem module list
 	db 8bh, 12h			;mov edx, [edx]     ; -> next entry
